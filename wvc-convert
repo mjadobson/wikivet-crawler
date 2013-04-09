@@ -37,7 +37,7 @@ quizzes.forEach(function (quiz) {
 
 		xml.push("\t<question type=\"multichoice\">");
 
-     	xml.push("\t\t<name>");
+		xml.push("\t\t<name>");
 		xml.push("\t\t\t<text>Question " + i + "</text>");
 		xml.push("\t\t</name>");
 
