@@ -1,5 +1,5 @@
 {
-  "name": "WikiVet-Crawler",
+  "name": "wikivet-crawler",
   "description": "Crawls WikiVet for quizzes.",
   "version": "0.0.1",
   "author": "Matt Dobson <mjadobson@gmail.com>",
