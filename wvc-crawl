@@ -1,0 +1,204 @@
+#!/usr/local/bin/node
+
+// Modules
+var fs = require("fs");
+var path = require("path");
+var cheerio = require("cheerio");
+var request = require("request");
+var program = require("commander");
+
+// Config
+var site = "http://en.wikivet.net";
+var loginPage = site + "/index.php?title=Special:UserLogin";
+var loginSubmit = site + "/index.php?title=Special:UserLogin&action=submitlogin&type=login&returnto=Veterinary_Education_Online";
+var visitedUrls = [];
+var quizzes = [];
+var crawlCount = 0;
+
+// Setup program
+program
+	.option("-o, --output <out>", "Destination for quizzes. Default: quizzes.out")
+	.option("-nl, --nolog", "Don't log")
+	.parse(process.argv);
+
+// Log helper
+var log = function (str) {
+	if (!program.nolog) console.log(str);
+};
+
+// Authenticate function
+var authenticate = function (_cb) {
+	request(loginPage, function (err, res, body) {
+		if (err) return _cb(err);
+
+		var $ = cheerio.load(body);
+		var token = $("input[name=wpLoginToken]").attr("value");
+		var opts = {
+			url: loginSubmit,
+			method: "POST",
+			form: {
+				wpName: program.username,
+				wpPassword: program.password,
+				wpRemember: 1,
+				wpLoginAttempt: "Log in",
+				wpLoginToken: token
+			}
+		};
+		
+		request(opts, function (err, res, body) {
+			if (err) return _cb(err);
+
+			var $ = cheerio.load(body);
+			var authenticated = !$(".errorbox").length;
+
+			if (authenticated) {
+				_cb();
+			} else {
+				_cb(new Error("Incorrect user/password."));
+			}
+		});
+	});
+};
+
+// Should URL be crawled?
+var isGoodUrl = function (href) {
+	// Must be string
+	if (typeof href != "string") return false;
+
+	// Must belong to wikivet
+	if (!href.match(/^http:\/\/en.wikivet.net\//)) return false;
+
+	// Must have quiz in url
+	if (!href.match(/quiz/i)) return false;
+
+	// Must have no query parameters.
+	if (href.match(/\?/)) return false;
+
+	// Must not be a special page.
+	if (href.match(/(special|file|wikivet|help|talk):/i)) return false;
+
+	// All good!!
+	return true;
+};
+
+// Crawl function
+var crawl = function (url, _cb) {
+	log("Requesting: " + url);
+
+	crawlCount++;
+
+	request(url, function (err, res, body) {
+		if (err) return console.error(err);
+
+		log("Reached: " + url);
+
+		var $ = cheerio.load(body);
+
+		extract(url, body);
+
+		$("a").each(function () {
+			var href = $(this).attr("href")
+			
+			if (!href) return;
+
+			if (href.match(/^\//)) href = site + href;
+			
+			if (isGoodUrl(href) && !~visitedUrls.indexOf(href)) {
+				visitedUrls.push(href);
+				crawl(href);
+			}
+		});
+
+		if (!--crawlCount && _cb) _cb();
+	});
+};
+
+// Extract quiz from page
+var extract = function (url, body) {
+	var $ = cheerio.load(body);
+
+	var title = $("#firstHeading").text();
+	var questions = [];
+	var $questions = $("table.question");
+	
+	if (!$questions.length) return;
+
+	log("Found a quiz: " + title)
+
+	$questions.each(function () {
+		var $q = $(this);
+
+		var num = parseInt($q.find(".qnum").text(), 10);
+		var question = $q.find(".qbody p").eq(0).html().trim();
+		var answers = [];
+		var max = $q.find("tr").length;
+		var img = $q.find("a[title*='Question']").html();
+
+		question = "<p>" + question + "</p>";
+		if (img) question += "<p>" + img + "</p>";
+
+		for (var i = 1; i <= max; i++) {
+			var choiceId = "label[for='Q" + num + "Choice" + i + "']";
+			var feedbackId = "#Q" + num + "Feedback" + i;
+
+			var choice = $q.find(choiceId).html();
+			var feedback = $q.find(feedbackId).html();
+			var correct = $q.find(feedbackId).hasClass("Qfeedbackcorrect");
+
+			if (!choice || !feedback) continue;
+
+			answers.push({
+				choice: choice,
+				feedback: feedback,
+				correct: correct
+			});
+		}
+
+		questions.push({
+			question: question,
+			answers: answers
+		});
+	});
+
+	quizzes.push({
+		title: title,
+		questions: questions,
+		url: url
+	});
+};
+
+// Run it.
+program.prompt("Username: ", function (user) {
+	program.username = user
+
+	program.password("Password: ", "*", function (pass){
+		program.password = pass;
+
+		log("Authenticating...");
+
+		authenticate(function (err) {
+			if (err) return console.error(err);
+
+			log("Authenticated!");
+
+			crawl(site, process.exit);
+		});
+	});
+});
+
+// Finish up.
+process.on("exit", function () {
+	var out = program.output || "quizzes.json";
+
+	if (out[0] != "/") out = path.join(process.cwd(), out);
+
+	fs.writeFileSync(out, JSON.stringify(quizzes, null, "\t"));
+
+	log("Finished. " + quizzes.length + " quizzes found.");
+});
+
+// Exit early.
+process.on("SIGINT", function () {
+	log("Got SIGINT. Exiting...");
+	process.exit();
+});

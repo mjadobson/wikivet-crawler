@@ -1,0 +1,19 @@
+{
+  "name": "WikiVet-Crawler",
+  "description": "Crawls WikiVet for quizzes.",
+  "version": "0.0.1",
+  "author": "Matt Dobson <mjadobson@gmail.com>",
+  "dependencies": {
+    "cheerio": "*",
+    "commander": "*",
+    "request": "*"
+  },
+  "main": "wvc",
+  "repository": "git://github.com/sugarstack/wikivet-crawler",
+  "preferGlobal": "true",
+  "bin": {
+    "wvc": "wvc",
+    "wvc-crawl": "wvc-crawl",
+    "wvc-convert": "wvc-convert"
+  }
+}

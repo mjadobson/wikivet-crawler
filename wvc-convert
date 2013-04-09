@@ -1,0 +1,64 @@
+#!/usr/local/bin/node
+
+// Modules
+var fs = require("fs");
+var path = require("path");
+var program = require("commander");
+
+program
+	.option("-i, --input <in>", "Source JSON file")
+	.option("-o, --output <out>", "Destination directory for XML files")
+	.parse(process.argv);
+
+if (!program.output) program.output = "./"
+
+var jsonPath = path.join(process.cwd(), program.input);
+var jsonFile = fs.readFileSync(jsonPath);
+var outputDir = path.join(program.output, "moodle_xml");
+var quizzes = JSON.parse(jsonFile);
+
+if (outputDir[0] != "/") outputDir = path.join(process.cwd(), outputDir);
+if (jsonFile[0] != "/") jsonFile = path.join(process.cwd(), jsonFile);
+
+if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
+
+quizzes.forEach(function (quiz) {
+	if (!quiz.questions) return;
+
+	var xml = [];
+
+	xml.push("<?xml version=\"1.0\" ?>");
+	xml.push("<quiz>");
+
+	quiz.questions.forEach(function (question) {
+		xml.push("\t<question type=\"multichoice\">");
+
+		xml.push("\t\t<questiontext format=\"html\">");
+		xml.push("\t\t\t<text><![CDATA[ " + question.question + " ]]></text>");
+		xml.push("\t\t</questiontext>");
+
+		if (question.answers) {
+			question.answers.forEach(function (answer) {
+				var frac = answer.correct ? 100 : 0;
+
+				xml.push("\t\t<answer fraction=\"" + frac + "\">");
+				xml.push("\t\t\t<text>" + answer.choice + "</text>");
+				xml.push("\t\t</answer>");
+
+				xml.push("\t\t<feeback>");
+				xml.push("\t\t\t<text><![CDATA[ " + answer.feedback + " ]]></text>");
+				xml.push("\t\t</feeback>");
+			});
+		}
+
+		xml.push("\t\t<shuffleanswers>1</shuffleanswers>");
+		xml.push("\t\t<single>true</single>");
+
+		xml.push("\t</question>");
+	});
+
+	xml.push("</quiz>");
+
+	var title = quiz.title.replace(/\s|\//g, "_");
+	fs.writeFileSync(path.join(outputDir, title + ".xml"), xml.join("\n"));
+});
