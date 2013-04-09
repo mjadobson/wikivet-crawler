@@ -3,7 +3,7 @@
 var program = require("commander");
 
 program
-	.version('0.0.2')
+	.version('0.0.3')
 	.command('crawl', 'Crawl WikiVet for quizzes')
 	.command('convert', 'Convert JSON to moodle XML')
 	.parse(process.argv);
