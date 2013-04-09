@@ -30,8 +30,15 @@ quizzes.forEach(function (quiz) {
 	xml.push("<?xml version=\"1.0\" ?>");
 	xml.push("<quiz>");
 
+	var i = 0;
 	quiz.questions.forEach(function (question) {
+		i++;
+
 		xml.push("\t<question type=\"multichoice\">");
+
+     	xml.push("\t\t<name>");
+		xml.push("\t\t\t<text>Question " + i + "</text>");
+		xml.push("\t\t</name>");
 
 		xml.push("\t\t<questiontext format=\"html\">");
 		xml.push("\t\t\t<text><![CDATA[ " + question.question + " ]]></text>");
