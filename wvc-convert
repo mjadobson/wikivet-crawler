@@ -32,6 +32,10 @@ quizzes.forEach(function (quiz) {
 
 	quiz.questions.forEach(function (question) {
 		xml.push("\t<question type=\"multichoice\">");
+		
+		xml.push("\t\t<name>");
+		xml.push("\t\t\t<text><text><[ " + question.question + " ]></text>");
+		xml.push("\t\t</name>");
 
 		xml.push("\t\t<questiontext format=\"html\">");
 		xml.push("\t\t\t<text><![CDATA[ " + question.question + " ]]></text>");
