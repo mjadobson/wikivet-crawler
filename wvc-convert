@@ -7,7 +7,7 @@ var program = require("commander");
 
 program
 	.option("-i, --input <in>", "Source JSON file")
-	.option("-o, --output <out>", "Destination directory. A 'moodle_xml' folder will be created inside it.")
+	.option("-o, --output <out>", "Destination dir for 'moodle_xml' dir. Default: current working dir")
 	.parse(process.argv);
 
 if (!program.output) program.output = "./"
