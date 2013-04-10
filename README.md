@@ -37,7 +37,7 @@ Usage
   Options:
 
     -h, --help          output usage information
-    -o, --output <out>  Destination for quizzes. Default: quizzes.out
+    -o, --output <out>  Destination for quizzes. Default: quizzes.json
     -nl, --nolog        Don't log
 ```
 
@@ -48,7 +48,7 @@ Usage
 
     -h, --help          output usage information
     -i, --input <in>    Source JSON file
-    -o, --output <out>  Destination directory. A 'moodle_xml' folder will be created inside.
+    -o, --output <out>  Destination dir for 'moodle_xml' dir. Default: current working dir
 ```
 
 Author
