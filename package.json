@@ -1,7 +1,7 @@
 {
   "name": "wikivet-crawler",
   "description": "Crawls WikiVet for quizzes.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Matt Dobson <mjadobson@gmail.com>",
   "dependencies": {
     "cheerio": "*",
