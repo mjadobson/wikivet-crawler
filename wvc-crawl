@@ -17,7 +17,7 @@ var crawlCount = 0;
 
 // Setup program
 program
-	.option("-o, --output <out>", "Destination for quizzes. Default: quizzes.out")
+	.option("-o, --output <out>", "Destination for quizzes. Default: quizzes.json")
 	.option("-nl, --nolog", "Don't log")
 	.parse(process.argv);
 
