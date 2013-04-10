@@ -14,12 +14,12 @@ if (!program.output) program.output = "./"
 
 var jsonPath = path.join(process.cwd(), program.input);
 var outputDir = path.join(program.output, "moodle_xml");
-var quizzes = JSON.parse(jsonFile);
 
 if (outputDir[0] != "/") outputDir = path.join(process.cwd(), outputDir);
 if (jsonPath[0] != "/") jsonPath = path.join(process.cwd(), jsonPath);
 
 var jsonFile = fs.readFileSync(jsonPath);
+var quizzes = JSON.parse(jsonFile);
 
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
