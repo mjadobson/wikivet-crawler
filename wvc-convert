@@ -10,7 +10,7 @@ program
 	.option("-o, --output <out>", "Destination dir for 'moodle_xml' dir. Default: current working dir")
 	.parse(process.argv);
 
-if (!program.output) program.output = "./"
+if (!program.output) program.output = "./";
 
 var jsonPath = path.join(process.cwd(), program.input);
 var outputDir = path.join(program.output, "moodle_xml");
