@@ -53,9 +53,9 @@ quizzes.forEach(function (quiz) {
 				xml.push("\t\t\t<text>" + answer.choice + "</text>");
 				xml.push("\t\t</answer>");
 
-				xml.push("\t\t<feeback>");
+				xml.push("\t\t<feedback>");
 				xml.push("\t\t\t<text><![CDATA[ " + answer.feedback + " ]]></text>");
-				xml.push("\t\t</feeback>");
+				xml.push("\t\t</feedback>");
 			});
 		}
 
